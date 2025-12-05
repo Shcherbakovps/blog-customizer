@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { StrictMode, CSSProperties } from 'react';
+import { StrictMode, CSSProperties, useState } from 'react';
 import clsx from 'clsx';
 
 import { Article } from './components/article/Article';
@@ -13,19 +13,41 @@ const domNode = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(domNode);
 
 const App = () => {
+	const [ isOpen, setIsOpen] = useState(false);
+
+	const [params, setParams] = useState(defaultArticleState);
+
+	const handleToggle = () => setIsOpen((v) => !v);
+	const handleClose = () => setIsOpen(false);
+
+	const handleApply = (newParams: typeof params) => {
+		setParams(newParams);
+	};
+
+	const handleReset = () => {
+		setParams(defaultArticleState);
+	};
+
 	return (
 		<main
 			className={clsx(styles.main)}
 			style={
 				{
-					'--font-family': defaultArticleState.fontFamilyOption.value,
-					'--font-size': defaultArticleState.fontSizeOption.value,
-					'--font-color': defaultArticleState.fontColor.value,
-					'--container-width': defaultArticleState.contentWidth.value,
-					'--bg-color': defaultArticleState.backgroundColor.value,
+					'--font-family': params.fontFamilyOption.value,
+					'--font-size': params.fontSizeOption.value,
+					'--font-color': params.fontColor.value,
+					'--container-width': params.contentWidth.value,
+					'--bg-color': params.backgroundColor.value,
 				} as CSSProperties
 			}>
-			<ArticleParamsForm />
+			<ArticleParamsForm
+				isOpen={isOpen}
+				onToggle={handleToggle}
+				onClose={handleClose}
+				value={params}
+				onApply={handleApply}
+				onReset={handleReset}
+			/>
 			<Article />
 		</main>
 	);
