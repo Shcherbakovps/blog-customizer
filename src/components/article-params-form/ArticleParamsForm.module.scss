@@ -1,10 +1,11 @@
 .container {
 	position: fixed;
 	left: 0;
-	width: 616px;
+	width: 614px;
 	height: 100%;
-	overflow: scroll;
-	transform: translate(-616px);
+	overflow-y: auto;
+	overflow-x: hidden;
+	transform: translate(-614px);
 	transition: transform 0.5s ease;
 }
 
@@ -17,12 +18,28 @@
 	flex-shrink: 0;
 	flex-direction: column;
 	box-sizing: border-box;
-	width: 616px;
+	width: 614px;
 	height: auto;
 	min-height: 100%;
-	padding: 50px 31px;
+	padding: 50px 30px 50px;
 	background-color: #ffffff;
 	border-right: 1px solid #000000;
+}
+
+.form :global(.separator) {
+	margin: 50px 0;
+}
+
+.header {
+	margin-bottom: 50px;
+}
+
+.block {
+	margin-bottom: 50px;
+}
+
+.blockAfterSeparator {
+	margin-top: 50px;
 }
 
 .bottomContainer {
@@ -30,3 +47,44 @@
 	justify-content: space-between;
 	margin-top: auto;
 }
+
+.fontSizeButtons {
+	display: flex;
+	gap: 0;
+	margin-top: 4px;
+	width: 367px;
+	border: 1px solid #000000;
+}
+
+.fontSizeButton {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	box-sizing: border-box;
+	flex: 1;
+	height: 35px;
+	padding: 0;
+	text-align: center;
+	border: none;
+	border-right: 1px solid #000000;
+	background-color: #ffffff;
+	cursor: pointer;
+}
+
+.fontSizeButton:last-child {
+	border-right: none;
+}
+
+.fontSizeButton:hover {
+	background-color: #ffedab;
+}
+
+.fontSizeButton_active {
+	background-color: #ffc802;
+}
+
+.fontSizeButton_active:hover {
+	background-color: #ffc802;
+}
+
+// minor change for PR creation
