@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import { Text } from 'src/ui/text';
 import { Select } from 'src/ui/select/Select';
 import { Separator } from 'src/ui/separator';
+import { RadioGroup } from 'src/ui/radio-group';
 
 import {
   fontFamilyOptions,
@@ -13,36 +15,23 @@ import {
   backgroundColors,
   contentWidthArr,
   ArticleStateType,
+  defaultArticleState,
 } from 'src/constants/articleProps';
 
 import styles from './ArticleParamsForm.module.scss';
 
 
 type Props = {
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-  value: ArticleStateType;
   onApply: (v: ArticleStateType) => void;
-  onReset: () => void;
 };
 
-export const ArticleParamsForm = ({
-  isOpen,
-  onToggle,
-  onClose,
-  value,
-  onApply,
-  onReset,
-}: Props) => {
-  // локальный черновик — для редактирования в панели
-  const [draft, setDraft] = useState<ArticleStateType>(value);
+export const ArticleParamsForm = ({ onApply }: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [draft, setDraft] = useState<ArticleStateType>(defaultArticleState);
   const asideRef = useRef<HTMLElement | null>(null);
 
-  // синхроним черновик с внешним value (например, после сброса в parent)
-  useEffect(() => {
-    setDraft(value);
-  }, [value]);
+  const handleToggle = () => setIsOpen((v) => !v);
+  const handleClose = () => setIsOpen(false);
 
   // закрытие панели по клику вне её области
   useEffect(() => {
@@ -52,7 +41,7 @@ export const ArticleParamsForm = ({
       const target = event.target as Node | null;
       if (!target) return;
       if (asideRef.current?.contains(target)) return;
-      onClose();
+      handleClose();
     };
 
     document.addEventListener('mousedown', handleOutside);
@@ -62,26 +51,31 @@ export const ArticleParamsForm = ({
       document.removeEventListener('mousedown', handleOutside);
       document.removeEventListener('touchstart', handleOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // универсальный апдейт: подставляем целый OptionType (как в defaultArticleState)
   const updateField = <K extends keyof ArticleStateType>(key: K, newValue: ArticleStateType[K]) => {
     setDraft((prev) => ({ ...prev, [key]: newValue }));
   };
 
+  const handleReset = () => {
+    setDraft(defaultArticleState);
+  };
+
   return (
     <>
-      <ArrowButton isOpen={isOpen} onClick={onToggle} />
+      <ArrowButton isOpen={isOpen} onClick={handleToggle} />
 
       <aside
         ref={asideRef}
-        className={`${styles.container} ${isOpen ? styles.container_open : ''}`}
+        className={clsx(styles.container, isOpen && styles.container_open)}
         aria-hidden={!isOpen}>
         <form
           className={styles.form}
           onSubmit={(e) => {
             e.preventDefault();
             onApply(draft);
+            // draft уже содержит примененные значения, оставляем его как есть
           }}
         >
           {/* Заголовок панели */}
@@ -101,26 +95,15 @@ export const ArticleParamsForm = ({
             />
           </div>
 
-          {/* 2) Размер текста — три кнопки */}
+          {/* 2) Размер текста — RadioGroup */}
           <div className={styles.block}>
-            <Text weight={800} size={12} uppercase>
-              Размер текста
-            </Text>
-            <div className={styles.fontSizeButtons}>
-              {fontSizeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`${styles.fontSizeButton} ${
-                    draft.fontSizeOption.value === option.value ? styles.fontSizeButton_active : ''
-                  }`}
-                  onClick={() => updateField('fontSizeOption', option)}>
-                  <Text weight={800} uppercase>
-                    {option.title}
-                  </Text>
-                </button>
-              ))}
-            </div>
+            <RadioGroup
+              name="fontSize"
+              title="Размер текста"
+              options={fontSizeOptions}
+              selected={draft.fontSizeOption}
+              onChange={(opt) => updateField('fontSizeOption', opt)}
+            />
           </div>
 
           {/* 3) Цвет текста — Select (список) */}
@@ -136,7 +119,7 @@ export const ArticleParamsForm = ({
           <Separator />
 
           {/* 4) Цвет фона — Select (список) */}
-          <div className={`${styles.block} ${styles.blockAfterSeparator}`}>
+          <div className={clsx(styles.block, styles.blockAfterSeparator)}>
             <Select
               title="Цвет фона"
               options={backgroundColors}
@@ -160,10 +143,7 @@ export const ArticleParamsForm = ({
               title="Сбросить"
               htmlType="button"
               type="clear"
-              onClick={() => {
-                onReset();
-                // синхронизация произойдёт из useEffect, когда parent обновит value
-              }}
+              onClick={handleReset}
             />
             <Button title="Применить" htmlType="submit" type="apply" />
           </div>
